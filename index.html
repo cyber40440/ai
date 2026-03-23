@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Offline Browser AI</title>
+</head>
+<body>
+    <h1>Local AI Chat</h1>
+    <input type="text" id="user-input" placeholder="Ask me something...">
+    <button onclick="askAI()">Send</button>
+    <p id="status">Status: Waiting...</p>
+    <div id="response" style="margin-top: 20px; font-weight: bold;"></div>
+
+    <script type="module">
+        // Importing the 'brain' from a CDN
+        import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers';
+
+        let generator;
+
+        // Initialize the model
+        async function init() {
+            document.getElementById('status').innerText = "Status: Loading model (first time takes a bit)...";
+            // Using a tiny model (SmolLM) that fits in a browser
+            generator = await pipeline('text-generation', 'Xenova/SmolLM-135M-Instruct');
+            document.getElementById('status').innerText = "Status: AI is Ready!";
+        }
+
+        window.askAI = async () => {
+            const input = document.getElementById('user-input').value;
+            document.getElementById('response').innerText = "Thinking...";
+            
+            const output = await generator(input, { max_new_tokens: 50, temperature: 0.7 });
+            
+            document.getElementById('response').innerText = output[0].generated_text;
+        };
+
+        init();
+    </script>
+</body>
+</html>
