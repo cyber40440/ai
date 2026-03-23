@@ -1,39 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Offline Browser AI</title>
+    <title>Cyber-Bot AI</title>
+    <style>
+        /* This makes it look like a hacker terminal */
+        body { background: #000; color: #0f0; font-family: monospace; display: flex; justify-content: center; padding-top: 50px; margin: 0; }
+        #container { border: 2px solid #0f0; width: 400px; padding: 20px; box-shadow: 0 0 15px #0f0; background: #000; }
+        #display { height: 300px; overflow-y: auto; border-bottom: 1px solid #0f0; margin-bottom: 10px; padding: 5px; }
+        input { background: #111; border: 1px solid #0f0; color: #0f0; width: 70%; padding: 10px; outline: none; }
+        button { background: #0f0; color: #000; border: none; padding: 10px; cursor: pointer; font-weight: bold; }
+        .user { color: #fff; }
+        .ai { color: #0f0; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <h1>Local AI Chat</h1>
-    <input type="text" id="user-input" placeholder="Ask me something...">
-    <button onclick="askAI()">Send</button>
-    <p id="status">Status: Waiting...</p>
-    <div id="response" style="margin-top: 20px; font-weight: bold;"></div>
 
-    <script type="module">
-        // Importing the 'brain' from a CDN
-        import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers';
+<div id="container">
+    <h2 style="text-align:center">CYBER-BRAIN v2.0</h2>
+    <div id="display">SYSTEM ONLINE... Type 'help' to start.</div>
+    <div style="display:flex; gap:5px;">
+        <input type="text" id="user-msg" placeholder="Type here..." autocomplete="off">
+        <button id="btn">SEND</button>
+    </div>
+</div>
 
-        let generator;
+<script>
+    // --- THE MASSIVE BRAIN ---
+    const brain = {
+        "hello": ["Greetings.", "System online.", "Hello, user."],
+        "joke": ["Why did the computer go to the doctor? It had a virus!", "What's a robot's favorite snack? Computer chips!"],
+        "space": ["Mars is the red planet.", "The moon has no air.", "Black holes are scary!"],
+        "roblox": ["Roblox is awesome!", "I like playing games too."],
+        "math": ["I can do math! Try typing something like 5 + 5."],
+        "help": ["Ask me about: space, roblox, jokes, or math!"]
+    };
 
-        // Initialize the model
-        async function init() {
-            document.getElementById('status').innerText = "Status: Loading model (first time takes a bit)...";
-            // Using a tiny model (SmolLM) that fits in a browser
-            generator = await pipeline('text-generation', 'Xenova/SmolLM-135M-Instruct');
-            document.getElementById('status').innerText = "Status: AI is Ready!";
+    const btn = document.getElementById("btn");
+    const inputField = document.getElementById("user-msg");
+    const display = document.getElementById("display");
+
+    function process() {
+        const rawInput = inputField.value;
+        if (!rawInput) return;
+        const val = rawInput.toLowerCase().trim();
+        let response = "";
+
+        // 1. TRY MATH
+        const mathMatch = val.match(/(\d+)\s*([\+\-\*\/])\s*(\d+)/);
+        if (mathMatch) {
+            const n1 = parseFloat(mathMatch[1]), op = mathMatch[2], n2 = parseFloat(match[3]);
+            let res = (op==="+")?n1+n2 : (op==="-")?n1-n2 : (op==="*")?n1*n2 : (n2!==0?n1/n2:"Error");
+            response = "RESULT: " + res;
         }
 
-        window.askAI = async () => {
-            const input = document.getElementById('user-input').value;
-            document.getElementById('response').innerText = "Thinking...";
-            
-            const output = await generator(input, { max_new_tokens: 50, temperature: 0.7 });
-            
-            document.getElementById('response').innerText = output[0].generated_text;
-        };
+        // 2. TRY BRAIN
+        if (!response) {
+            for (let t in brain) {
+                if (val.includes(t)) {
+                    response = brain[t][Math.floor(Math.random() * brain[t].length)];
+                    break;
+                }
+            }
+        }
 
-        init();
-    </script>
+        if (!response) response = "I'm still learning. Try 'help'.";
+
+        // Update Screen
+        display.innerHTML += `<p class="user">YOU: ${rawInput}</p><p class="ai">AI: ${response}</p>`;
+        display.scrollTop = display.scrollHeight;
+        inputField.value = "";
+    }
+
+    btn.onclick = process;
+    inputField.onkeypress = (e) => { if(e.key === "Enter") process(); };
+</script>
+
 </body>
 </html>
